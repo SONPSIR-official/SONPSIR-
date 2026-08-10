@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0B0C10">
+<title>S.O.N.P.S.I.R — OSINT студия</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- ЭКРАН 0: ОНБОРДИНГ -->
+<section id="screen-onboard" class="screen active">
+  <div class="onboard-wrap">
+    <div class="brand-emblem"><div class="emblem-ring"></div><div class="emblem-core">S</div></div>
+    <h1 class="brand-title">S.O.N.P.S.I.R</h1>
+    <p class="brand-sub">OSINT студия</p>
+    <p class="onboard-hint">Введите авторский ник. Он будет проставлен в PDF-отчётах как подтверждение авторства. Сменить ник можно не чаще раза в 7 дней.</p>
+    <div class="field-group">
+      <label class="field-label">Ваш ник</label>
+      <input id="onboard-nick" class="input input-gold" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Analyst_X">
+    </div>
+    <button id="onboard-go" class="btn btn-gold btn-block">Войти в студию</button>
+    <p class="onboard-id" id="onboard-idline">ID: —</p>
+  </div>
+</section>
+
+<!-- ЭКРАН 1: ГЛАВНЫЙ -->
+<section id="screen-home" class="screen">
+  <header class="home-top">
+    <div class="lang-chip" id="home-lang-chip"><span class="globe-ico">🌐</span><span>Русский</span><span class="chev">▾</span></div>
+    <button class="icon-btn" id="home-settings"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 2.6 14H2.5a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 2.6V2.5a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 4.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.1a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
+  </header>
+
+  <div class="home-hero">
+    <div class="crest">
+      <div class="crest-laurel left"></div>
+      <div class="crest-shield">
+        <div class="crest-globe"></div>
+        <div class="crest-name">S.O.N.P.S.I.R</div>
+        <div class="crest-stars">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="crest-laurel right"></div>
+    </div>
+    <h2 class="home-logo">S.O.N.P.S.I.R</h2>
+    <p class="home-tag">OSINT студия</p>
+  </div>
+
+  <button id="home-create" class="btn btn-gold btn-block">
+    <span class="plus">＋</span><span>Создать досье</span>
+  </button>
+
+  <div class="home-section-title">МОИ ДОСЬЕ</div>
+  <ul id="dossier-list" class="dossier-list"></ul>
+  <div id="dossier-empty" class="empty-state">Пока нет сохранённых досье. Создайте первое.</div>
+
+  <button id="home-lang-btn" class="btn btn-ghost btn-block">
+    <span class="globe-ico">🌐</span><span>Сменить язык</span>
+  </button>
+</section>
+
+<!-- ЭКРАН 2: ХОЛСТ -->
+<section id="screen-canvas" class="screen">
+  <canvas id="fx-canvas" class="fx-canvas"></canvas>
+  <div id="canvas-bg" class="canvas-bg"></div>
+
+  <header class="cv-topbar">
+    <button id="cv-save-exit" class="btn btn-gold btn-sm">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      <span>Сохраниться и выйти</span>
+    </button>
+    <div class="cv-logo">S.O.N.P.S.I.R</div>
+    <button class="icon-btn" id="cv-menu">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+    </button>
+  </header>
+
+  <div class="cv-meta">
+    <div class="cv-meta-row"><span>Досье:</span> <b id="cv-dossier-name">—</b></div>
+    <div class="cv-meta-row"><span>Режим:</span> <span>Анализ связей</span></div>
+    <div class="cv-meta-row"><span>Статус:</span> <span id="cv-status-pill" class="status-pill">—</span></div>
+    <div class="cv-meta-row">
+      <span>ID:</span> <span id="cv-user-id">—</span> &nbsp;|&nbsp;
+      <span>Ник:</span> <span id="cv-user-nick">—</span>
+    </div>
+  </div>
+
+  <div class="cv-stats" id="cv-stats">
+    <div class="stat"><b id="st-events">0</b><span>События</span></div>
+    <div class="stat"><b id="st-links">0</b><span>Связи</span></div>
+    <div class="stat"><b id="st-subjects">0</b><span>Субъекты</span></div>
+    <div class="stat"><b id="st-objects">0</b><span>Объекты</span></div>
+    <div class="stat"><b id="st-analytics">0%</b><span>Аналитика</span></div>
+    <div class="stat"><b id="st-trust">0%</b><span>Доверие</span></div>
+    <div class="stat warn"><b id="st-warn">0</b><span>Предупреждения</span></div>
+  </div>
+
+  <div id="cv-stage" class="cv-stage">
+    <svg id="cv-links-svg" class="cv-links-svg"></svg>
+    <div id="cv-blocks" class="cv-blocks"></div>
+  </div>
+
+  <div class="over-widget" id="over-widget">
+    <div class="over-bar">
+      <span class="over-g">G</span>
+      <input id="over-input" class="over-input" type="text" autocomplete="off" spellcheck="false">
+      <button id="over-clear" class="over-clear" hidden>✕</button>
+    </div>
+    <div id="over-results" class="over-results" hidden></div>
+  </div>
+
+  <nav class="cv-bottombar">
+    <button class="cv-tab" data-panel="blocks">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>БЛОКИ</span>
+    </button>
+    <button class="cv-tab" data-panel="links">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M8 6h8M6 8v8M8 18h8"/></svg>
+      <span>СВЯЗИ</span>
+    </button>
+    <button class="cv-tab" data-panel="tables">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      <span>ТАБЛИЦЫ</span>
+    </button>
+  </nav>
+</section>
+
+<!-- МОДАЛКИ -->
+<div class="modal" id="m-create">
+  <div class="modal-box">
+    <h3>Создать досье</h3>
+    <label>Введите название досье</label>
+    <input id="create-name" class="input input-gold" type="text" maxlength="48">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>Отмена</button>
+      <button class="btn btn-gold" id="create-confirm">Создать</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="m-dossier-menu">
+  <div class="modal-box pop-box">
+    <button class="pop-item danger" id="dm-delete"><span>🗑</span><span>Удалить досье</span></button>
+    <button class="pop-item" id="dm-pin"><span>📌</span><span>Закрепить досье</span></button>
+    <button class="pop-item" id="dm-status"><span>◑</span><span>Изменить статус</span><span class="chev">›</span></button>
+  </div>
+</div>
+
+<div class="modal" id="m-status">
+  <div class="modal-box pop-box">
+    <button class="pop-item" data-status="work"><span class="dot dot-work"></span><span>В работе</span></button>
+    <button class="pop-item" data-status="done"><span class="dot dot-done"></span><span>Завершённый</span></button>
+    <button class="pop-item" data-status="closed"><span class="dot dot-closed"></span><span>Закрыт</span></button>
+  </div>
+</div>
+
+<div class="modal" id="m-blocks">
+  <div class="modal-box modal-wide">
+    <h3>Добавить блок</h3>
+    <div class="block-grid" id="block-grid">
+      <div class="block-cell" data-add="gold"><div class="bc-prev">T</div><small>Текст (золотой)</small></div>
+      <div class="block-cell" data-add="green"><div class="bc-prev">T</div><small>Текст (зелёный)</small></div>
+      <div class="block-cell" data-add="red"><div class="bc-prev">T</div><small>Текст (красный)</small></div>
+      <div class="block-cell" data-add="blue"><div class="bc-prev">T</div><small>Текст (синий)</small></div>
+      <div class="block-cell" data-add="rgb"><div class="bc-prev">?</div><small>Свой цвет (RGB)</small></div>
+      <div class="block-cell" data-add="loc"><div class="bc-prev">📍</div><small>Локация</small></div>
+      <div class="block-cell" data-add="aud"><div class="bc-prev">📼</div><small>Аудио</small></div>
+      <div class="block-cell" data-add="photo"><div class="bc-prev">🖼</div><small>Фото</small></div>
+      <div class="block-cell" data-add="video"><div class="bc-prev">▶</div><small>Видео</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="m-tables">
+  <div class="modal-box modal-wide">
+    <h3>Размер таблицы (выделите область)</h3>
+    <div class="table-pick-info">0 × 0</div>
+    <div class="table-grid" id="table-grid"></div>
+    <button class="btn btn-gold btn-block" id="table-create">Разместить таблицу</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script defer src="js/store.js"></script>
+<script defer src="js/i18n.js"></script>
+<script defer src="js/fx.js"></script>
+<script defer src="js/canvas.js"></script>
+<script defer src="js/blocks.js"></script>
+<script defer src="js/tables.js"></script>
+<script defer src="js/app.js"></script>
+</body>
+</html>
