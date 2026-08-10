@@ -97,7 +97,7 @@ def веб_сервер(порт, обработчик):
             self.end_headers()
             self.wfile.write(ответ.encode("utf-8"))
         def log_message(self, *a): pass
-    сервер = ThreadingThreadingHTTPServer(("0.0.0.0", порт), H)
+    сервер = ThreadingHTTPServer(("0.0.0.0", порт), H)
     сервер.handle_error = lambda *a, **k: print("SONPSIR: запрос с ошибкой пропущен (проверь обработчик)")
     сервер.serve_forever()
 def телеграм_обновления(токен, смещение=0):
@@ -175,7 +175,6 @@ def _визуал_html():
     return f'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#302b63">{_визуал_font_link()}<title>{_визуал["заголовок"]}</title><style>{_визуал_css()}</style></head><body><div class="card"><h1>{_визуал["заголовок"]}</h1>{тело}{холст_html}</div></body></html>'
 def визуал_css(css): _визуал.setdefault("свой_css", []).append(css)
 def визуал_блок(html): _визуал["компоненты"].append(("блок", html))
-def визуал_кисть(цвет): _визуал["кисть"] = цвет
 def визуал_витрина():
     g5 = 'display:grid;grid-template-columns:repeat(5,1fr);gap:6px;justify-items:center;margin:10px 0'
     h = '<p class="t">Шрифтов: '+str(len(_ШРИФТЫ))+' | Тем: '+str(len(_ТЕМЫ))+' | Размеров: '+str(len(_РАЗМЕРЫ))+' | Форм: '+str(len(_ФОРМЫ))+' | Комбинаций: '+str(len(_ТЕМЫ)*len(_РАЗМЕРЫ)*len(_ФОРМЫ))+'</p>'
@@ -212,7 +211,7 @@ def визуал_показать(порт, на_событие=None):
             self.wfile.write(код)
         def log_message(self, *a): pass
     print(f"ВИЗУАЛ запущен: http://localhost:{порт}")
-    сервер = ThreadingThreadingHTTPServer(("0.0.0.0", порт), H)
+    сервер = ThreadingHTTPServer(("0.0.0.0", порт), H)
     сервер.handle_error = lambda *a, **k: print("SONPSIR: запрос с ошибкой пропущен (проверь обработчик)")
     сервер.serve_forever()
 
@@ -327,7 +326,7 @@ def чат_запусти(порт, название="SONPSIR Чат", файл=
             self.wfile.write(страница().encode())
         def log_message(self, *a): pass
     print("МЕССЕНДЖЕР запущен (история в %s): http://localhost:%s" % (файл, порт))
-    сервер = ThreadingThreadingHTTPServer(("0.0.0.0", порт), H)
+    сервер = ThreadingHTTPServer(("0.0.0.0", порт), H)
     сервер.handle_error = lambda *a, **k: print("SONPSIR: запрос с ошибкой пропущен (проверь обработчик)")
     сервер.serve_forever()
 def отобразить(список, ф): return [ф(x) for x in список]
@@ -807,6 +806,8 @@ def main():
         with open(кэш, "w", encoding="utf-8") as ф: ф.write(полный)
     сдвиг = (ПРЕЛЮДИЯ + "\n").count("\n")
     карта_полная = {k + сдвиг: v for k, v in карта.items()}
+    сдвиг = (ПРЕЛЮДИЯ + "\n").count("\n")
+    карта_полная = {k + сдвиг: v for k, v in карта.items()}
     try:
         exec(compile(полный, путь, "exec"), {})
     except SystemExit:
@@ -819,7 +820,7 @@ def main():
                "IndexError":"нет такого элемента","KeyError":"нет такого ключа",
                "NameError":"имя не найдено","ValueError":"плохое значение",
                "FileNotFoundError":"файл не найден"}.get(type(e).__name__, str(e))
-        print(f"ОШИБКА в '{os.path.basename(путь)}'" + (f", строка {стр}" if стр else "") + f": {рус}")
+        print(f"❌ОШИБКА в '{os.path.basename(путь)}'" + (f", строка {стр}" if стр else "") + f": {рус}")
         подсказка = {
             "NameError": "ты взял имя, которого нет. Создай его через 'пусть' или проверь опечатку.",
             "ZeroDivisionError": "нельзя делить на ноль.",
