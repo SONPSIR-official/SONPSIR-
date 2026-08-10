@@ -195,6 +195,84 @@ def визуал_витрина():
 def визуал_показать(порт, на_событие=None):
     from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
     from urllib.parse import urlparse, parse_qs
+
+def случайное_целое(от, до):
+    return random.randint(от, до)
+
+def выбрать(список):
+    if not список: return None
+    return random.choice(список)
+
+def диапазон(от, до):
+    return list(range(от, до))
+
+def соединить(список, разделитель=" "):
+    return разделитель.join(str(x) for x in список)
+
+def создать_объект(**kwargs):
+    return kwargs
+
+
+import math
+import statistics
+
+# --- МАТЕМАТИКА ---
+def среднее(список):
+    if not список: return 0
+    return sum(список) / len(список)
+
+def медиана(список):
+    if not список: return 0
+    sorted_list = sorted(список)
+    n = len(sorted_list)
+    mid = n // 2
+    if n % 2 == 0:
+        return (sorted_list[mid - 1] + sorted_list[mid]) / 2
+    else:
+        return sorted_list[mid]
+
+def дисперсия(список):
+    if len(список) < 2: return 0
+    return statistics.variance(список)
+
+def факториал(н):
+    if н < 0: return 0
+    res = 1
+    for i in range(1, н + 1): res *= i
+    return res
+
+def степень(основание, показатель):
+    return основание ** показатель
+
+def корень(число):
+    return math.sqrt(число)
+
+def логарифм(число, основание=math.e):
+    return math.log(число, основание)
+
+# --- УНИВЕРСАЛЬНАЯ ГЕНЕРАЦИЯ ---
+def сгенерировать_числа(количество, от, до):
+    return [random.randint(от, до) for _ in range(количество)]
+
+def сгенерировать_дроби(количество, от, до):
+    return [round(random.uniform(от, до), 2) for _ in range(количество)]
+
+def сгенерировать_строки(количество, длина=5):
+    import string
+    chars = string.ascii_letters + string.digits
+    return [''.join(random.choice(chars) for _ in range(длина)) for _ in range(количество)]
+
+def сгенерировать_координаты(количество, x_max=100, y_max=100):
+    return [(random.randint(0, x_max), random.randint(0, y_max)) for _ in range(количество)]
+
+def перемешать(список):
+    random.shuffle(список)
+    return список
+
+def уникальный_выбор(список, количество):
+    if количество > len(список): return список
+    return random.sample(список, количество)
+
     class H(BaseHTTPRequestHandler):
         def do_GET(self):
             u = urlparse(self.path)
@@ -217,7 +295,7 @@ def визуал_показать(порт, на_событие=None):
 
 def система(команда):
     import subprocess
-    r = subprocess.run(команда, shell=True, capture_output=True, text=True)
+    r = subprocess.run(команда, shell=False, capture_output=True, text=True)
     return r.stdout + r.stderr
 def файл_существует(путь):
     import os
@@ -305,7 +383,87 @@ def визуал_пиксель(x, y, цвет):
 def чат_запусти(порт, название="SONPSIR Чат", файл="чат.db"):
     from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
     from urllib.parse import urlparse, parse_qs
-    import html as _html, sqlite3, datetime
+
+def случайное_целое(от, до):
+    return random.randint(от, до)
+
+def выбрать(список):
+    if not список: return None
+    return random.choice(список)
+
+def диапазон(от, до):
+    return list(range(от, до))
+
+def соединить(список, разделитель=" "):
+    return разделитель.join(str(x) for x in список)
+
+def создать_объект(**kwargs):
+    return kwargs
+
+
+import math
+import statistics
+
+# --- МАТЕМАТИКА ---
+def среднее(список):
+    if not список: return 0
+    return sum(список) / len(список)
+
+def медиана(список):
+    if not список: return 0
+    sorted_list = sorted(список)
+    n = len(sorted_list)
+    mid = n // 2
+    if n % 2 == 0:
+        return (sorted_list[mid - 1] + sorted_list[mid]) / 2
+    else:
+        return sorted_list[mid]
+
+def дисперсия(список):
+    if len(список) < 2: return 0
+    return statistics.variance(список)
+
+def факториал(н):
+    if н < 0: return 0
+    res = 1
+    for i in range(1, н + 1): res *= i
+    return res
+
+def степень(основание, показатель):
+    return основание ** показатель
+
+def корень(число):
+    return math.sqrt(число)
+
+def логарифм(число, основание=math.e):
+    return math.log(число, основание)
+
+# --- УНИВЕРСАЛЬНАЯ ГЕНЕРАЦИЯ ---
+def сгенерировать_числа(количество, от, до):
+    return [random.randint(от, до) for _ in range(количество)]
+
+def сгенерировать_дроби(количество, от, до):
+    return [round(random.uniform(от, до), 2) for _ in range(количество)]
+
+def сгенерировать_строки(количество, длина=5):
+    import string
+    chars = string.ascii_letters + string.digits
+    return [''.join(random.choice(chars) for _ in range(длина)) for _ in range(количество)]
+
+def сгенерировать_координаты(количество, x_max=100, y_max=100):
+    return [(random.randint(0, x_max), random.randint(0, y_max)) for _ in range(количество)]
+
+def перемешать(список):
+    random.shuffle(список)
+    return список
+
+def уникальный_выбор(список, количество):
+    if количество > len(список): return список
+    return random.sample(список, количество)
+
+    import html as _html
+    import sqlite3, datetime
+    from html import escape as _html_escape
     бд = sqlite3.connect(файл, check_same_thread=False)
     бд.execute("CREATE TABLE IF NOT EXISTS msg (имя TEXT, текст TEXT, время TEXT)")
     бд.commit()
@@ -345,6 +503,84 @@ def процесс(функция, *арг):
 def мессенджер_сервер(порт, файл="мессенджер.db"):
     from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
     from urllib.parse import urlparse, parse_qs
+
+def случайное_целое(от, до):
+    return random.randint(от, до)
+
+def выбрать(список):
+    if not список: return None
+    return random.choice(список)
+
+def диапазон(от, до):
+    return list(range(от, до))
+
+def соединить(список, разделитель=" "):
+    return разделитель.join(str(x) for x in список)
+
+def создать_объект(**kwargs):
+    return kwargs
+
+
+import math
+import statistics
+
+# --- МАТЕМАТИКА ---
+def среднее(список):
+    if not список: return 0
+    return sum(список) / len(список)
+
+def медиана(список):
+    if not список: return 0
+    sorted_list = sorted(список)
+    n = len(sorted_list)
+    mid = n // 2
+    if n % 2 == 0:
+        return (sorted_list[mid - 1] + sorted_list[mid]) / 2
+    else:
+        return sorted_list[mid]
+
+def дисперсия(список):
+    if len(список) < 2: return 0
+    return statistics.variance(список)
+
+def факториал(н):
+    if н < 0: return 0
+    res = 1
+    for i in range(1, н + 1): res *= i
+    return res
+
+def степень(основание, показатель):
+    return основание ** показатель
+
+def корень(число):
+    return math.sqrt(число)
+
+def логарифм(число, основание=math.e):
+    return math.log(число, основание)
+
+# --- УНИВЕРСАЛЬНАЯ ГЕНЕРАЦИЯ ---
+def сгенерировать_числа(количество, от, до):
+    return [random.randint(от, до) for _ in range(количество)]
+
+def сгенерировать_дроби(количество, от, до):
+    return [round(random.uniform(от, до), 2) for _ in range(количество)]
+
+def сгенерировать_строки(количество, длина=5):
+    import string
+    chars = string.ascii_letters + string.digits
+    return [''.join(random.choice(chars) for _ in range(длина)) for _ in range(количество)]
+
+def сгенерировать_координаты(количество, x_max=100, y_max=100):
+    return [(random.randint(0, x_max), random.randint(0, y_max)) for _ in range(количество)]
+
+def перемешать(список):
+    random.shuffle(список)
+    return список
+
+def уникальный_выбор(список, количество):
+    if количество > len(список): return список
+    return random.sample(список, количество)
+
     import sqlite3, json, datetime
     бд = sqlite3.connect(файл, check_same_thread=False)
     бд.execute("CREATE TABLE IF NOT EXISTS msg (комната TEXT, имя TEXT, текст TEXT, время TEXT)")
@@ -417,6 +653,9 @@ def расшифровать(токен, ключ="сонпсир"):
     k = hashlib.sha256(ключ.encode()).digest()
     x = base64.b64decode(токен)
     return bytes(c ^ k[i % len(k)] for i, c in enumerate(x)).decode()
+def визуал_кисть(цвет):
+    _визуал["кисть"] = цвет
+
 def цвет(текст, ц="зелёный"):
     коды = {"красный":"31","зелёный":"32","жёлтый":"33","синий":"34","фиолетовый":"35","голубой":"36","белый":"37"}
     return f"\033[{коды.get(ц,'37')}m{текст}\033[0m"
@@ -699,8 +938,10 @@ def бенч(запросов=200, потоков=20):
     def работник(н):
         nonlocal сделано
         for _ in range(н):
-            urllib.request.urlopen("http://127.0.0.1:9999/").read()
-            with лок: сделано += 1
+            try:
+                urllib.request.urlopen("http://127.0.0.1:9999/").read()
+                with лок: сделано += 1
+            except: pass
     t0 = time.time()
     ths = [threading.Thread(target=работник, args=(запросов // потоков,)) for _ in range(потоков)]
     for t in ths: t.start()
@@ -768,6 +1009,9 @@ def транслировать_с_картой(код, папка):
     дерево = поднять_функции(дерево)
     г = Генератор(); питон = г.сгенерировать(дерево)
     return питон, г.source_map
+def следи(файл):
+    print("команда следи отключена в этой версии")
+
 def main():
     if len(sys.argv) < 2:
         справка(); return
