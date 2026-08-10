@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+_out.py
+_out2.py
+*.db
+*.zip
+*.pyz
+sonpsir
+банки
+распаковано/
