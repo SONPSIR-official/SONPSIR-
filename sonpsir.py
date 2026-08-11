@@ -1150,7 +1150,11 @@ def main():
     with open(путь, encoding="utf-8") as ф:
         код = ф.read()
     try:
-        питон, карта = транслировать_с_картой(код, папка)
+        try:
+            питон, карта = транслировать_с_картой(код, папка)
+        except SyntaxError as e:
+            print("ОШИБКА в '%s': %s" % (os.path.basename(путь), переведи(str(e))))
+            sys.exit(1)
     except ОшибкаСонпсир as e:
         print("ОШИБКА SONPSIR:", e); sys.exit(1)
     полный = ПРЕЛЮДИЯ + "\n" + питон
