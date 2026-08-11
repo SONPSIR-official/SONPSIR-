@@ -738,6 +738,36 @@ def визуал_показать(порт=8080):
     print("Страница открыта: http://localhost:%d" % порт)
     сервер.serve_forever()
 
+def визуал_html_рус(текст):
+    import re as _re
+    out = []
+    for стр in текст.strip().split(chr(10)):
+        стр = стр.strip()
+        if not стр: continue
+        for тег, рус in [("h1","заголовок1"),("h2","заголовок2"),("h3","заголовок3"),("h4","заголовок4")]:
+            if стр.startswith(рус + " "):
+                out.append("<%s>%s</%s>" % (тег, стр[len(рус)+1:], тег))
+                break
+        else:
+            m = _re.match(r"абзац\s+(.+)", стр)
+            if m: out.append("<p>%s</p>" % m.group(1)); continue
+            m = _re.match(r"кнопка\s+id='([^']+)'\s+(.+)", стр)
+            if m: out.append("<button id='%s' style='padding:12px;margin:4px'>%s</button>" % (m.group(1), m.group(2))); continue
+            m = _re.match(r"ввод\s+id='([^']+)'\s*(.*)", стр)
+            if m: out.append("<input id='%s' style='padding:8px;margin:4px'>" % m.group(1)); continue
+            m = _re.match(r"холст\s+id='([^']+)'\s+ширина=(\d+)\s+высота=(\d+)", стр)
+            if m: out.append("<canvas id='%s' width='%s' height='%s'></canvas>" % (m.group(1), m.group(2), m.group(3))); continue
+            m = _re.match(r"картинка\s+src='([^']+)'\s*(.*)", стр)
+            if m: out.append("<img src='%s' style='max-width:100%%'>"); continue
+            m = _re.match(r"ссылка\s+url='([^']+)'\s+(.+)", стр)
+            if m: out.append("<a href='%s'>%s</a>" % (m.group(1), m.group(2))); continue
+            m = _re.match(r"блок\s+id='([^']+)'", стр)
+            if m: out.append("<div id='%s'></div>" % m.group(1)); continue
+            m = _re.match(r"разделитель", стр)
+            if m: out.append("<hr>"); continue
+            out.append(стр)
+    _виз["компоненты"].append(("html", chr(10).join(out)))
+
 def визуал_скрипт_рус(код):
     from core.lexer import Лексер, нормализовать
     from core.parser import Парсер
@@ -750,6 +780,16 @@ def визуал_скрипт_рус(код):
         "function длина(x){return x.length;}",
         "function на_клик(id,f){document.getElementById(id).onclick=f;}",
         "function случайное_целое(a,b){return Math.floor(Math.random()*(b-a+1))+a;}",
+        "function фигура(в,р){return {в:в,р:р};}",
+        "function куб_вершины(){return [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];}",
+        "function куб_рёбра(){return [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];}",
+        "function пирамида_вершины(){return [[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1],[0,1,0]];}",
+        "function пирамида_рёбра(){return [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]];}",
+        "function сфера_вершины(ш,в){var V=[];for(var i=0;i<=ш;i++){var th=Math.PI*i/ш;for(var j=0;j<=в;j++){var ph=2*Math.PI*j/в;V.push([Math.sin(th)*Math.cos(ph),Math.cos(th),Math.sin(th)*Math.sin(ph)]);}}return V;}",
+        "function сфера_рёбра(ш,в){var E=[];for(var i=0;i<=ш;i++){for(var j=0;j<в;j++){E.push([i*(в+1)+j,i*(в+1)+j+1]);if(i<ш)E.push([i*(в+1)+j,(i+1)*(в+1)+j]);}}return E;}",
+        "function сдвинуть(в,x,y,z){var н=[];for(var i=0;i<в.length;i++)н.push([в[i][0]+x,в[i][1]+y,в[i][2]+z]);return н;}",
+        "function масштабировать(в,к){var н=[];for(var i=0;i<в.length;i++)н.push([в[i][0]*к,в[i][1]*к,в[i][2]*к]);return н;}",
+        "function нарисовать_фигуры(кт,фигуры,а,б,цвет){for(var f=0;f<фигуры.length;f++){var в=фигуры[f].в;var р=фигуры[f].р;var точки=[];for(var i=0;i<в.length;i++){var x=в[i][0],y=в[i][1],z=в[i][2];var x1=x*Math.cos(а)-z*Math.sin(а);var z1=x*Math.sin(а)+z*Math.cos(а);var y1=y*Math.cos(б)-z1*Math.sin(б);var z2=y*Math.sin(б)+z1*Math.cos(б);var s=3/(3+z2);точки.push([200+x1*s*90,200+y1*s*90]);}for(var e=0;e<р.length;e++){линия(кт,точки[р[e][0]][0],точки[р[e][0]][1],точки[р[e][1]][0],точки[р[e][1]][1],цвет,2);}}}",
         "function холст(id){return document.getElementById(id).getContext('2d');}",
         "function фон(кт,ц,ш,в){кт.fillStyle=ц;кт.fillRect(0,0,ш,в);}",
         "function линия(кт,x1,y1,x2,y2,ц,т){кт.strokeStyle=ц;кт.lineWidth=т;кт.beginPath();кт.moveTo(x1,y1);кт.lineTo(x2,y2);кт.stroke();}",
