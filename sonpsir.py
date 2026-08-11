@@ -728,6 +728,16 @@ def визуал_показать(порт=8080):
     страница = визуал_страница()
     class _H(_BaseHandler):
         def do_GET(self):
+            if self.path != "/" and not self.path.endswith(".html"):
+                имя = self.path.split("/")[-1]
+                import os as _os
+                if _os.path.exists(имя):
+                    self.send_response(200)
+                    тип = "application/javascript" if имя.endswith(".js") else "application/octet-stream"
+                    self.send_header("Content-Type", тип)
+                    self.end_headers()
+                    self.wfile.write(open(имя, "rb").read())
+                    return
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
@@ -737,6 +747,18 @@ def визуал_показать(порт=8080):
     сервер = _HTTPServer(("0.0.0.0", порт), _H)
     print("Страница открыта: http://localhost:%d" % порт)
     сервер.serve_forever()
+
+def визуал_библиотека(у):
+    _виз["компоненты"].append(("библиотека", str(у)))
+
+def визуал_three():
+    _виз["компоненты"].append(("внешний", "three.min.js"))
+    _виз["компоненты"].append(("внешний", "GLTFLoader.js"))
+
+def визуал_герой(файл):
+
+    js = """(function(){var s=new THREE.Scene();var k=new THREE.PerspectiveCamera(60,1,0.1,100);k.position.set(0,1,4);var r=new THREE.WebGLRenderer({antialias:true});r.setSize(400,400);document.getElementById('герой_холст').appendChild(r.domElement);var d=new THREE.DirectionalLight(0xffffff,1.5);d.position.set(2,3,4);s.add(d);s.add(new THREE.AmbientLight(0xffffff,0.7));var mix=null;var past=0;new THREE.GLTFLoader().load('ФФАЙЛ',function(g){s.add(g.scene);mix=new THREE.AnimationMixer(g.scene);for(var i=0;i<g.animations.length;i++){mix.clipAction(g.animations[i]).play();}});function t(){var now=Date.now()/1000;if(mix){mix.update(now-past);}past=now;r.render(s,k);requestAnimationFrame(t);}t();})();"""
+    _виз["компоненты"].append(("html", "<div id='герой_холст'></div><script src='three.min.js'></script><script src='GLTFLoader.js'></script><script>" + js.replace("ФФАЙЛ", файл) + "</" + "script>"))
 
 def визуал_html_рус(текст):
     import re as _re
@@ -769,6 +791,9 @@ def визуал_html_рус(текст):
     _виз["компоненты"].append(("html", chr(10).join(out)))
 
 def визуал_скрипт_рус(код):
+    if any(сл in код for сл in ("сцена_создать", "меш_куб", "меш_сфера", "меш_цилиндр", "меш_конус", "загрузить_героя", "отрисовать")) and not _виз.get("_three"):
+        _виз["_three"] = True
+        _виз["компоненты"].append(("html", "<script src='three.min.js'></script><script src='GLTFLoader.js'></script>"))
     from core.lexer import Лексер, нормализовать
     from core.parser import Парсер
     from core.codegen import JSГенератор
@@ -780,7 +805,7 @@ def визуал_скрипт_рус(код):
         "function длина(x){return x.length;}",
         "function на_клик(id,f){document.getElementById(id).onclick=f;}",
         "function случайное_целое(a,b){return Math.floor(Math.random()*(b-a+1))+a;}",
-        "function фигура(в,р){return {в:в,р:р};}",
+        "function фигура(в,р,ц){return {в:в,р:р,ц:ц||null};}",
         "function куб_вершины(){return [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];}",
         "function куб_рёбра(){return [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];}",
         "function пирамида_вершины(){return [[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1],[0,1,0]];}",
@@ -789,7 +814,8 @@ def визуал_скрипт_рус(код):
         "function сфера_рёбра(ш,в){var E=[];for(var i=0;i<=ш;i++){for(var j=0;j<в;j++){E.push([i*(в+1)+j,i*(в+1)+j+1]);if(i<ш)E.push([i*(в+1)+j,(i+1)*(в+1)+j]);}}return E;}",
         "function сдвинуть(в,x,y,z){var н=[];for(var i=0;i<в.length;i++)н.push([в[i][0]+x,в[i][1]+y,в[i][2]+z]);return н;}",
         "function масштабировать(в,к){var н=[];for(var i=0;i<в.length;i++)н.push([в[i][0]*к,в[i][1]*к,в[i][2]*к]);return н;}",
-        "function нарисовать_фигуры(кт,фигуры,а,б,цвет){for(var f=0;f<фигуры.length;f++){var в=фигуры[f].в;var р=фигуры[f].р;var точки=[];for(var i=0;i<в.length;i++){var x=в[i][0],y=в[i][1],z=в[i][2];var x1=x*Math.cos(а)-z*Math.sin(а);var z1=x*Math.sin(а)+z*Math.cos(а);var y1=y*Math.cos(б)-z1*Math.sin(б);var z2=y*Math.sin(б)+z1*Math.cos(б);var s=3/(3+z2);точки.push([200+x1*s*90,200+y1*s*90]);}for(var e=0;e<р.length;e++){линия(кт,точки[р[e][0]][0],точки[р[e][0]][1],точки[р[e][1]][0],точки[р[e][1]][1],цвет,2);}}}",
+        "function растянуть(в,x,y,z){var н=[];for(var i=0;i<в.length;i++)н.push([в[i][0]*x,в[i][1]*y,в[i][2]*z]);return н;}",
+        "function нарисовать_фигуры(кт,фигуры,а,б,цвет){for(var f=0;f<фигуры.length;f++){var в=фигуры[f].в;var р=фигуры[f].р;var точки=[];for(var i=0;i<в.length;i++){var x=в[i][0],y=в[i][1],z=в[i][2];var x1=x*Math.cos(а)-z*Math.sin(а);var z1=x*Math.sin(а)+z*Math.cos(а);var y1=y*Math.cos(б)-z1*Math.sin(б);var z2=y*Math.sin(б)+z1*Math.cos(б);var s=3/(3+z2);точки.push([200+x1*s*90,200-y1*s*90]);}for(var e=0;e<р.length;e++){линия(кт,точки[р[e][0]][0],точки[р[e][0]][1],точки[р[e][1]][0],точки[р[e][1]][1],(фигуры[f].ц||цвет),2);}}}",
         "function холст(id){return document.getElementById(id).getContext('2d');}",
         "function фон(кт,ц,ш,в){кт.fillStyle=ц;кт.fillRect(0,0,ш,в);}",
         "function линия(кт,x1,y1,x2,y2,ц,т){кт.strokeStyle=ц;кт.lineWidth=т;кт.beginPath();кт.moveTo(x1,y1);кт.lineTo(x2,y2);кт.stroke();}",
@@ -797,6 +823,36 @@ def визуал_скрипт_рус(код):
         "function косинус(x){return Math.cos(x);}",
         "function добавить(с,э){с.push(э);}",
         "function кадр(ф){requestAnimationFrame(ф);}",
+        "function сцена_создать(id){var s=new THREE.Scene();var k=new THREE.PerspectiveCamera(60,1,0.1,100);k.position.set(0,0.8,4);var r=new THREE.WebGLRenderer({antialias:true});r.setSize(400,400);document.getElementById(id).appendChild(r.domElement);var d=new THREE.DirectionalLight(0xffffff,1.5);d.position.set(2,3,4);s.add(d);s.add(new THREE.AmbientLight(0xffffff,0.7));return {сцена:s,камера:k,рендер:r};}",
+        "function группа(){return new THREE.Group();}",
+        "function добавить_в(об,ч){if(об.сцена){об.сцена.add(ч);}else{об.add(ч);}}",
+        "function меш_куб(ц){return new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshToonMaterial({color:ц}));}",
+        "function меш_сфера(ц){return new THREE.Mesh(new THREE.SphereGeometry(0.5,24,24),new THREE.MeshToonMaterial({color:ц}));}",
+        "function меш_цилиндр(ц){return new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,1,24),new THREE.MeshToonMaterial({color:ц}));}",
+        "function меш_конус(ц){return new THREE.Mesh(new THREE.ConeGeometry(0.5,1,24),new THREE.MeshToonMaterial({color:ц}));}",
+        "function позиция(м,x,y,z){м.position.set(x,y,z);}",
+        "function размер(м,x,y,z){м.scale.set(x,y,z);}",
+        "function поворот_y(м,у){м.rotation.y+=у;}",
+        "function поворот_x(м,у){м.rotation.x=у;}",
+        "function отрисовать(об){об.рендер.render(об.сцена,об.камера);}",
+        "function загрузить_героя(файл,колбэк){new THREE.GLTFLoader().load(файл,колбэк);}",
+        "function играть_анимации(г){var m=new THREE.AnimationMixer(г.scene);for(var i=0;i<г.animations.length;i++){m.clipAction(г.animations[i]).play();}return m;}",
+        "function играть_одну(г,н){var m=new THREE.AnimationMixer(г.scene);m.clipAction(г.animations[н]).play();return m;}",
+        "function список_анимаций(г){var s=[];for(var i=0;i<г.animations.length;i++){s.push(г.animations[i].name);}return s;}",
+        "function сцена3d(id){var div=document.getElementById(id);var с=new THREE.Scene();var к=new THREE.PerspectiveCamera(60,1,0.1,100);к.position.set(0,0.8,5);var р=new THREE.WebGLRenderer({antialias:true,alpha:true});р.setSize(400,400);div.appendChild(р.domElement);с.add(new THREE.AmbientLight(0xffffff,0.7));var н=new THREE.DirectionalLight(0xffffff,0.7);н.position.set(2,3,4);с.add(н);var г=new THREE.Group();с.add(г);return {сцена:с,камера:к,рен:р,группа:г};}",
+        "function куб3d(о,ц,x,y,z,sx,sy,sz){var m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshToonMaterial({color:ц}));m.position.set(x,y,z);о.группа.add(m);return m;}",
+        "function сфера3d(о,ц,x,y,z,r){var m=new THREE.Mesh(new THREE.SphereGeometry(r,24,24),new THREE.MeshToonMaterial({color:ц}));m.position.set(x,y,z);о.группа.add(m);return m;}",
+        "function цилиндр3d(о,ц,x,y,z,r,h){var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),new THREE.MeshToonMaterial({color:ц}));m.position.set(x,y,z);о.группа.add(m);return m;}",
+        "function конус3d(о,ц,x,y,z,r,h){var m=new THREE.Mesh(new THREE.ConeGeometry(r,h,24),new THREE.MeshToonMaterial({color:ц}));m.position.set(x,y,z);о.группа.add(m);return m;}",
+        "function юбка3d(о,ц,x,y,z,r,h){var m=new THREE.Mesh(new THREE.ConeGeometry(r,h,24),new THREE.MeshToonMaterial({color:ц}));m.rotation.x=Math.PI;m.position.set(x,y,z);о.группа.add(m);return m;}",
+        "function цикл3d(о,ф){function t(){requestAnimationFrame(t);о.группа.rotation.y+=0.01;if(ф)ф();о.рен.render(о.сцена,о.камера);}t();}",
+        "function цвет_rgb(ц){var c=document.createElement('canvas');c.width=1;var x=c.getContext('2d');x.fillStyle=ц;var s=x.fillStyle;if(s[0]!='#')return[200,200,200];return [parseInt(s.substr(1,2),16),parseInt(s.substr(3,2),16),parseInt(s.substr(5,2),16)];}",
+        "function модель(в,г,ц){return {в:в,г:г,ц:ц};}",
+        "function грани_куба(){return [[0,1,2],[0,2,3],[4,6,5],[4,7,6],[0,4,5],[0,5,1],[1,5,6],[1,6,2],[2,6,7],[2,7,3],[3,7,4],[3,4,0]];}",
+        "function грани_пирамиды(){return [[0,1,4],[1,2,4],[2,3,4],[3,0,4],[3,2,1],[3,1,0]];}",
+        "function грани_сферы(ш,в){var G=[];for(var i=0;i<ш;i++){for(var j=0;j<в;j++){var a=i*(в+1)+j,b=a+1,c=(i+1)*(в+1)+j,d=c+1;G.push([a,b,d]);G.push([a,d,c]);}}return G;}",
+        "function повернуть(в,а,б){var R=[];for(var i=0;i<в.length;i++){var x=в[i][0],y=в[i][1],z=в[i][2];var x1=x*Math.cos(а)-z*Math.sin(а);var z1=x*Math.sin(а)+z*Math.cos(а);var y1=y*Math.cos(б)-z1*Math.sin(б);var z2=y*Math.sin(б)+z1*Math.cos(б);R.push([x1,y1,z2]);}return R;}",
+        "function нарисовать_модели(кт,модели,а,б){var сп=[];for(var m=0;m<модели.length;m++){var M=модели[m];var R=повернуть(M.в,а,б);var rgb=цвет_rgb(M.ц||'#ccc');var P=[];for(var i=0;i<R.length;i++){var s=3/(3+R[i][2]);P.push([200+R[i][0]*s*90,200-R[i][1]*s*90]);}if(M.г){for(var g=0;g<M.г.length;g++){var f=M.г[g];var p0=R[f[0]],p1=R[f[1]],p2=R[f[2]];var ux=p1[0]-p0[0],uy=p1[1]-p0[1],uz=p1[2]-p0[2];var vx=p2[0]-p0[0],vy=p2[1]-p0[1],vz=p2[2]-p0[2];var nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;var dl=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;nx/=dl;ny/=dl;nz/=dl;var яр=0.35+0.65*Math.abs(nx*0.5+ny*0.7+nz*0.5);var zc=(p0[2]+p1[2]+p2[2])/3;сп.push([zc,P[f[0]],P[f[1]],P[f[2]],rgb,яр]);}}}сп.sort(function(q,w){return w[0]-q[0];});for(var k=0;k<сп.length;k++){var e=сп[k];var r=Math.min(255,e[4][0]*e[5])|0,g2=Math.min(255,e[4][1]*e[5])|0,b3=Math.min(255,e[4][2]*e[5])|0;кт.fillStyle='rgb('+r+','+g2+','+b3+')';кт.strokeStyle=кт.fillStyle;кт.beginPath();кт.moveTo(e[1][0],e[1][1]);кт.lineTo(e[2][0],e[2][1]);кт.lineTo(e[3][0],e[3][1]);кт.closePath();кт.fill();кт.stroke();}}",
     ]) + chr(10)
     _виз["компоненты"].append(("скрипт", пом + js))
 
