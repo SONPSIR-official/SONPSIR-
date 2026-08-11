@@ -656,6 +656,88 @@ def расшифровать(токен, ключ="сонпсир"):
 def визуал_кисть(цвет):
     _визуал["кисть"] = цвет
 
+
+import base64 as _b64
+import html as _html_mod
+from http.server import HTTPServer as _HTTPServer, BaseHTTPRequestHandler as _BaseHandler
+
+_виз = {"заголовок": "SONPSIR", "тема": "светлая", "шрифт": "sans-serif", "размер": 16, "форма": "8", "компоненты": [], "кисть": "чёрный"}
+
+def _виз_мим(путь):
+    типы = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".mp4": "video/mp4", ".webm": "video/webm"}
+    for кон, тип in типы.items():
+        if путь.endswith(кон):
+            return тип
+    return "application/octet-stream"
+
+def _виз_данные(путь):
+    with open(путь, "rb") as ф:
+        return "data:" + _виз_мим(путь) + ";base64," + _b64.b64encode(ф.read()).decode()
+
+def визуал_заголовок(т): _виз["заголовок"] = str(т)
+def визуал_текст(т): _виз["компоненты"].append(("текст", _html_mod.escape(str(т)), _виз.get("цвет"), _виз.get("размер_текста")))
+def визуал_цвет(ц):
+    _таб = {"красный":"red","зелёный":"green","синий":"blue","белый":"white","чёрный":"black","жёлтый":"yellow","оранжевый":"orange","фиолетовый":"purple","голубой":"skyblue","серый":"gray","розовый":"pink"}
+    _виз["цвет"] = _таб.get(str(ц), str(ц))
+def визуал_масштаб(н): _виз["размер_текста"] = int(н)
+def визуал_кнопка(т, действие=""): _виз["компоненты"].append(("кнопка", _html_mod.escape(str(т)), str(действие)))
+def визуал_тема(т): _виз["тема"] = str(т)
+def визуал_шрифт(т): _виз["шрифт"] = str(т)
+def визуал_размер(н): _виз["размер"] = int(н)
+def визуал_форма(т): _виз["форма"] = str(т)
+def визуал_фото(путь): _виз["компоненты"].append(("фото", _виз_данные(путь)))
+def визуал_видео(путь): _виз["компоненты"].append(("видео", _виз_данные(путь)))
+def визуал_html(код): _виз["компоненты"].append(("html", str(код)))
+def визуал_скрипт(код): _виз["компоненты"].append(("скрипт", str(код)))
+def визуал_холст(ш, в): _виз["компоненты"].append(("холст", int(ш), int(в), []))
+def визуал_кисть(цвет): _виз["кисть"] = str(цвет)
+def визуал_пиксель(х, у):
+    for к in _виз["компоненты"]:
+        if к[0] == "холст":
+            к[3].append((х, у, _виз["кисть"]))
+def визуал_страница():
+    темы = {"тёмная": ("#121212", "#eeeeee"), "светлая": ("#fafafa", "#111111")}
+    фон, текст = темы.get(_виз["тема"], ("#fafafa", "#111111"))
+    части = ["<body style='background:%s;color:%s;font-family:%s;font-size:%spx'>" % (фон, текст, _виз["шрифт"], _виз["размер"])]
+    части.append("<h1>%s</h1>" % _html_mod.escape(str(_виз["заголовок"])))
+    for к in _виз["компоненты"]:
+        if к[0] == "текст":
+            стиль = ""
+            if len(к) > 2 and к[2]: стиль += "color:%s;" % к[2]
+            if len(к) > 3 and к[3]: стиль += "font-size:%spx;" % к[3]
+            части.append("<p style='%s'>%s</p>" % (стиль, к[1]))
+        elif к[0] == "кнопка":
+            части.append("<button onclick='%s'>%s</button>" % (к[2], к[1]))
+        elif к[0] == "фото":
+            части.append("<img src='%s' style='max-width:100%%;border-radius:%spx'>" % (к[1], _виз["форма"]))
+        elif к[0] == "видео":
+            части.append("<video src='%s' controls style='max-width:100%%;border-radius:%spx'></video>" % (к[1], _виз["форма"]))
+        elif к[0] == "html":
+            части.append(к[1])
+        elif к[0] == "скрипт":
+            части.append("<script>%s</script>" % к[1])
+        elif к[0] == "холст":
+            svg = ["<svg width='%s' height='%s'>" % (к[1], к[2])]
+            for (х, у, ц) in к[3]:
+                svg.append("<rect x='%s' y='%s' width='2' height='2' fill='%s'/>" % (х, у, ц))
+            svg.append("</svg>")
+            части.append("".join(svg))
+    части.append("</body>")
+    return "".join(части)
+def визуал_показать(порт=8080):
+    страница = визуал_страница()
+    class _H(_BaseHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(страница.encode())
+        def log_message(self, *а):
+            pass
+    сервер = _HTTPServer(("0.0.0.0", порт), _H)
+    print("Страница открыта: http://localhost:%d" % порт)
+    сервер.serve_forever()
+
 def цвет(текст, ц="зелёный"):
     коды = {"красный":"31","зелёный":"32","жёлтый":"33","синий":"34","фиолетовый":"35","голубой":"36","белый":"37"}
     return f"\033[{коды.get(ц,'37')}m{текст}\033[0m"
