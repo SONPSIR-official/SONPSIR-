@@ -69,6 +69,9 @@ def перевести_cpp(код):
         m = re.match(r'(int|float|double|bool|string|auto|char)\s+(\w+)\s*=\s*(.+)$', стр)
         if m:
             out.append(pad + '%s = %s' % (m.group(2), выр(m.group(3)))); continue
+        m = re.match(r'(int|float|double|bool|string|auto|char)\s+(\w+)$', стр)
+        if m:
+            out.append(pad + '%s = 0' % m.group(2)); continue
         m = re.match(r'(int|float|double|void|bool|string|auto)\s+(\w+)\s*\(([^)]*)\)$', стр)
         if m:
             args = [a.strip().split()[-1] for a in m.group(3).split(',') if a.strip()]

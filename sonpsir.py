@@ -750,6 +750,13 @@ def визуал_скрипт_рус(код):
         "function длина(x){return x.length;}",
         "function на_клик(id,f){document.getElementById(id).onclick=f;}",
         "function случайное_целое(a,b){return Math.floor(Math.random()*(b-a+1))+a;}",
+        "function холст(id){return document.getElementById(id).getContext('2d');}",
+        "function фон(кт,ц,ш,в){кт.fillStyle=ц;кт.fillRect(0,0,ш,в);}",
+        "function линия(кт,x1,y1,x2,y2,ц,т){кт.strokeStyle=ц;кт.lineWidth=т;кт.beginPath();кт.moveTo(x1,y1);кт.lineTo(x2,y2);кт.stroke();}",
+        "function синус(x){return Math.sin(x);}",
+        "function косинус(x){return Math.cos(x);}",
+        "function добавить(с,э){с.push(э);}",
+        "function кадр(ф){requestAnimationFrame(ф);}",
     ]) + chr(10)
     _виз["компоненты"].append(("скрипт", пом + js))
 

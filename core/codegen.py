@@ -248,7 +248,7 @@ class JSГенератор:
     def в_Переменная(self, у):
         return у.имя
     def в_Вызов(self, у):
-        таб = {"print": "console.log", "строка": "String", "число": "Number", "str": "String", "int": "Number", "float": "Number"}
+        таб = {"print": "console.log", "строка": "String", "число": "Number", "str": "String", "int": "Number", "float": "Number", "len": "длина"}
         имя = таб.get(у.имя, у.имя)
         return "%s(%s)" % (имя, ", ".join(self.выражение(a) for a in у.аргументы))
     def в_Атрибут(self, у):
