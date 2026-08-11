@@ -1126,6 +1126,11 @@ def переведи(сообщение):
     return сообщение
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1].endswith('.cpp'):
+        from cpp_mode import перевести_cpp
+        exec(перевести_cpp(open(sys.argv[1], encoding='utf-8').read()))
+        return
+
     if len(sys.argv) < 2:
         справка(); return
     команда = sys.argv[1]
