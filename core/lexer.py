@@ -53,9 +53,10 @@ class Лексер:
                     self.поз += 1
                 continue
             старт = self.поз
-            if c == '"':
+            if c in ('"', "'"):
+                кав = c
                 self.поз += 1
-                while self.поз < len(self.код) and self.код[self.поз] != '"':
+                while self.поз < len(self.код) and self.код[self.поз] != кав:
                     if self.код[self.поз] == '\\':
                         self.поз += 1
                     if self.поз < len(self.код):

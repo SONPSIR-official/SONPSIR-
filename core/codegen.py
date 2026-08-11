@@ -146,3 +146,130 @@ class Генератор:
         return "(-%s)" % self.выражение(у.операнд)
     def в_Именованный(self, у):
         return "%s=%s" % (у.имя, self.выражение(у.значение))
+
+class JSГенератор:
+    def __init__(self):
+        self.отступ = 0
+        self.строки = []
+        self.source_map = {}
+    def _добавить(self, т):
+        self.строки.append("  " * self.отступ + т)
+    def сгенерировать(self, у):
+        if у.тип == "Программа":
+            for з in у.заявления:
+                self.заявление(з)
+        else:
+            self.заявление(у)
+        return "\n".join(self.строки)
+    def заявление(self, з):
+        м = getattr(self, "з_" + з.тип, None)
+        if м is None:
+            raise Exception("js: нет " + з.тип)
+        м(з)
+    def блок(self, список):
+        self.отступ += 1
+        if список:
+            for з in список:
+                self.заявление(з)
+        else:
+            self._добавить(";")
+        self.отступ -= 1
+    def з_Пусть(self, у):
+        self._добавить("var %s = %s;" % (у.имя, self.выражение(у.значение)))
+    def з_Присваивание(self, у):
+        self._добавить("%s = %s;" % (self.выражение(у.цель), self.выражение(у.значение)))
+    def з_Если(self, у):
+        первый = True
+        for усл, тело in у.ветви:
+            преф = "if" if первый else "else if"
+            self._добавить("%s (%s) {" % (преф, self.выражение(усл)))
+            self.блок(тело)
+            self._добавить("}")
+            первый = False
+        if у.иначе_тело:
+            self._добавить("else {")
+            self.блок(у.иначе_тело)
+            self._добавить("}")
+    def з_Пока(self, у):
+        self._добавить("while (%s) {" % self.выражение(у.условие))
+        self.блок(у.тело)
+        self._добавить("}")
+    def з_Повторять(self, у):
+        self._добавить("for (var _i = 0; _i < %s; _i++) {" % self.выражение(у.раз))
+        self.блок(у.тело)
+        self._добавить("}")
+    def з_Для(self, у):
+        self._добавить("for (var %s of %s) {" % (у.имя, self.выражение(у.список)))
+        self.блок(у.тело)
+        self._добавить("}")
+    def з_Функция(self, у):
+        self._добавить("function %s(%s) {" % (у.имя, ", ".join(у.аргументы)))
+        self.блок(у.тело)
+        self._добавить("}")
+    def з_Вернуть(self, у):
+        if у.значение is not None:
+            self._добавить("return %s;" % self.выражение(у.значение))
+        else:
+            self._добавить("return;")
+    def з_Прервать(self, у):
+        self._добавить("break;")
+    def з_Пропустить(self, у):
+        self._добавить("continue;")
+    def з_Выход(self, у):
+        self._добавить("throw 'выход';")
+    def з_Глобально(self, у):
+        pass
+    def з_Подключить(self, у):
+        pass
+    def з_Попробовать(self, у):
+        self._добавить("try {")
+        self.блок(у.тело)
+        self._добавить("}")
+        if у.перехват:
+            имя = у.ошибка if у.ошибка else "_ошибка"
+            self._добавить("catch (%s) {" % имя)
+            self.блок(у.перехват)
+            self._добавить("}")
+    def з_ВыражениеЗаявление(self, у):
+        self._добавить(self.выражение(у.выражение) + ";")
+    def выражение(self, у):
+        м = getattr(self, "в_" + у.тип, None)
+        if м is None:
+            raise Exception("js: нет выражения " + у.тип)
+        return м(у)
+    def в_Число(self, у):
+        return repr(у.значение)
+    def в_Строка(self, у):
+        return repr(у.значение)
+    def в_ЛогикаЗначение(self, у):
+        return "true" if у.значение else "false"
+    def в_Ничто(self, у):
+        return "null"
+    def в_Переменная(self, у):
+        return у.имя
+    def в_Вызов(self, у):
+        таб = {"print": "console.log", "строка": "String", "число": "Number", "str": "String", "int": "Number", "float": "Number"}
+        имя = таб.get(у.имя, у.имя)
+        return "%s(%s)" % (имя, ", ".join(self.выражение(a) for a in у.аргументы))
+    def в_Атрибут(self, у):
+        return "%s.%s" % (self.выражение(у.объект), у.имя)
+    def в_ВызовМетода(self, у):
+        return "%s.%s(%s)" % (self.выражение(у.объект), у.имя, ", ".join(self.выражение(a) for a in у.аргументы))
+    def в_Индекс(self, у):
+        return "%s[%s]" % (self.выражение(у.объект), self.выражение(у.индекс))
+    def в_Список(self, у):
+        return "[%s]" % ", ".join(self.выражение(e) for e in у.элементы)
+    def в_Арифметика(self, у):
+        return "(%s %s %s)" % (self.выражение(у.левый), у.оп, self.выражение(у.правый))
+    def в_Сравнение(self, у):
+        оп = у.оп
+        if оп == "==": оп = "==="
+        if оп == "!=": оп = "!=="
+        return "(%s %s %s)" % (self.выражение(у.левый), оп, self.выражение(у.правый))
+    def в_Логика(self, у):
+        оп = "&&" if у.оп == "and" else "||"
+        return "(%s %s %s)" % (self.выражение(у.левый), оп, self.выражение(у.правый))
+    def в_Не(self, у):
+        return "(!%s)" % self.выражение(у.операнд)
+    def в_Унарный(self, у):
+        return "(-%s)" % self.выражение(у.операнд)

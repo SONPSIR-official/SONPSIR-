@@ -738,6 +738,21 @@ def визуал_показать(порт=8080):
     print("Страница открыта: http://localhost:%d" % порт)
     сервер.serve_forever()
 
+def визуал_скрипт_рус(код):
+    from core.lexer import Лексер, нормализовать
+    from core.parser import Парсер
+    from core.codegen import JSГенератор
+    дерево = Парсер(Лексер(нормализовать(код)).разобрать()).разобрать()
+    js = JSГенератор().сгенерировать(дерево)
+    пом = chr(10).join([
+        "function элемент(id){return document.getElementById(id);}",
+        "function текст(id,t){document.getElementById(id).innerText=t;}",
+        "function длина(x){return x.length;}",
+        "function на_клик(id,f){document.getElementById(id).onclick=f;}",
+        "function случайное_целое(a,b){return Math.floor(Math.random()*(b-a+1))+a;}",
+    ]) + chr(10)
+    _виз["компоненты"].append(("скрипт", пом + js))
+
 def цвет(текст, ц="зелёный"):
     коды = {"красный":"31","зелёный":"32","жёлтый":"33","синий":"34","фиолетовый":"35","голубой":"36","белый":"37"}
     return f"\033[{коды.get(ц,'37')}m{текст}\033[0m"
@@ -1094,6 +1109,22 @@ def транслировать_с_картой(код, папка):
 def следи(файл):
     print("команда следи отключена в этой версии")
 
+def переведи(сообщение):
+    таб = {
+        "unterminated string": "незакрытая строка — проверь кавычки",
+        "invalid syntax": "ошибка в построении команды — проверь синтаксис",
+        "expected an indented block": "после этой строки нужен блок с отступом",
+        "unexpected indent": "лишний отступ в начале строки",
+        "division by zero": "деление на ноль",
+        "is not defined": "не найдено — создай через пусть или проверь опечатку",
+        "not callable": "это не команда — проверь имя",
+        "No module named": "библиотека не установлена — поставь через pip",
+    }
+    for англ, рус in таб.items():
+        if англ in сообщение:
+            return рус
+    return сообщение
+
 def main():
     if len(sys.argv) < 2:
         справка(); return
@@ -1146,7 +1177,7 @@ def main():
                "IndexError":"нет такого элемента","KeyError":"нет такого ключа",
                "NameError":"имя не найдено","ValueError":"плохое значение",
                "FileNotFoundError":"файл не найден"}.get(type(e).__name__, str(e))
-        print(f"❌ОШИБКА в '{os.path.basename(путь)}'" + (f", строка {стр}" if стр else "") + f": {рус}")
+        print(f"❌ОШИБКА в '{os.path.basename(путь)}'" + (f", строка {стр}" if стр else "") + f": {переведи(рус)}")
         подсказка = {
             "NameError": "ты взял имя, которого нет. Создай его через 'пусть' или проверь опечатку.",
             "ZeroDivisionError": "нельзя делить на ноль.",
